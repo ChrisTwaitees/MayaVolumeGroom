@@ -5,8 +5,9 @@ import maya.OpenMaya as om
 import random
 
 # HDA Locations for -HoudiniAsset Load Asset
+hdalib = 'C:\Users\Chris Thwaites\Desktop\SAMSON\hdas\\'
 
-hdalib = '/sunrise/global/sunrise/assetbuilds/houdini_library/release/'
+#hdalib = '/sunrise/global/sunrise/assetbuilds/houdini_library/release/'
 
 voronoi = hdalib + 'mayavoronoisurface-v02.00.hda'
 voronoi_ass = 'sunrise_asset::Sop/mayavoronoisurface::02.00'
@@ -279,6 +280,10 @@ def attachtube(width):
     unused = mc.listRelatives(hda, ad=True)
     for object in unused:
         mc.delete(object)
+
+
+def templategeo():
+    pass
 
 
 def gencurvesfromtube():
