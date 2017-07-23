@@ -100,7 +100,7 @@ def voronoisurface(subdivs):
     mc.rename(face, scalpfaceid)
     clean(scalpfaceid)
     mc.polyOptions(scalpfaceid, cm='diffuse')
-    mc.polyMergeVertex(surface, d=0.25)
+    mc.polyMergeVertex(scalpfaceid, d=0.25)
     mc.delete(asset)
 
 
@@ -298,15 +298,34 @@ def gencurvesfromtube():
 
 
 def export_regionmap():
-    # selecting verts and detaching to create separate faces
 
+    # selecting verts and detaching to create separate faces
+    selection = mc.ls(selection=True)[0]
+    vertex_count = mc.polyEvaluate(v=True)
+    mc.select(selection + '.vtx[0:' + str(vertex_count) + ']')
+    mc.DetachComponent()
 
     # exporting vertex map
 
-    artAttrPaintVertexCtx()
+    mc.select(selection)
+    iter = getrandom_id()
+   #polypaint = 'artAttrPaintVertexCtx1' + str(iter)
+    polypaint = 'artAttrPaintVertexCtx'
+    # try:
+    #     mc.artAttrPaintVertexCtx(polypaint, ch=True)
+    # except():
+    #     pass
+    mc.select(selection + '.vtx[0:' + str(vertex_count) + ']')
+    mc.setToolTo(polypaint)
+    mc.artAttrPaintVertexCtx(efm='rgb', fsx=2048, fsy=2048, pvf=False)
+    mm.eval('artExportMapDialog "{0}"'.format(polypaint))
+
 
     # reconnecting verts to form whole geo and deleting history
 
+    # mc.polyMergeVertex(selection, d=0.25)
+    # clean(selection)
+    # print 'exporting of map successful!'
 
 def switchselection_mode(selectionType):
     modes = {'object': 'o', 'component': 'co'}

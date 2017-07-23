@@ -1,7 +1,7 @@
 import PySide2.QtCore as qc
 import PySide2.QtGui as qg
 import PySide2.QtWidgets as qw
-
+import SamsonTubeGroom as STB
 
 class SimpleGUI(qw.QDialog):
     def __init__(self):
@@ -39,13 +39,18 @@ class SimpleGUI(qw.QDialog):
 
         characterinfo_layout = qw.QVBoxLayout()
         characterinfo_layout.setAlignment(qc.Qt.AlignVCenter)
+
         scalplayout = qw.QVBoxLayout()
         scalplayout.setContentsMargins(5,5,5,5)
         scalplayout.setAlignment(qc.Qt.AlignVCenter)
+
+
         centerguidelayout = qw.QVBoxLayout()
         centerguidelayout.setAlignment(qc.Qt.AlignVCenter)
+
         tubelayout = qw.QVBoxLayout()
         tubelayout.setAlignment(qc.Qt.AlignVCenter)
+
         gencurveslayout = qw.QVBoxLayout()
         gencurveslayout.setAlignment(qc.Qt.AlignVCenter)
 
@@ -56,6 +61,9 @@ class SimpleGUI(qw.QDialog):
         centerguide_frame.setLayout(centerguidelayout)
         tube_frame.setLayout(tubelayout)
         generatecurves_frame.setLayout(gencurveslayout)
+
+
+
 
         # widgets
 
@@ -72,15 +80,26 @@ class SimpleGUI(qw.QDialog):
         characterinfo_name.setPlaceholderText('Enter Character Asset Code...')
         characterinfo_layout.addWidget(characterinfo_name)
 
-
         # SCALP widgets
 
         scalp_header = qw.QLabel('SCALP')
         scalp_header.setFont(bold_font)
         scalplayout.addWidget(scalp_header)
 
+        scalpvoronoilayout = qw.QFormLayout()
+        scalpvoronoilayout.setAlignment(qc.Qt.AlignVCenter)
+        scalplayout.addLayout(scalpvoronoilayout)
+
         voronoi_bttn = qw.QPushButton('Voronoi Surface')
-        scalplayout.addWidget(voronoi_bttn)\
+        voronoi_densitycount = qw.QLineEdit()
+        voronoi_densitycount.setMaxLength(3)
+        voronoi_densitycount.setClearButtonEnabled(True)
+        voronoi_densitycount.insert('50')
+        voronoi_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
+        scalpvoronoilayout.addRow(voronoi_bttn, voronoi_densitycount)
+
+
+        voronoi_bttn.clicked.connect(lambda: STB.voronoisurface(voronoi_densitycount.text()))
 
         refreshscalp_bttn = qw.QPushButton('Refresh')
         scalplayout.addWidget(refreshscalp_bttn)
@@ -154,7 +173,10 @@ class SimpleGUI(qw.QDialog):
         self.layout().addWidget(generatecurves_frame)
 
 
+ # functions
 
+    def printText(self,message):
+        print message
 
 
 
