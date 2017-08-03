@@ -6,7 +6,7 @@ import SamsonTubeGroom as STB
 class SimpleGUI(qw.QDialog):
     def __init__(self):
         qw.QDialog.__init__(self)
-        self.setWindowTitle('Samson')
+        self.setWindowTitle('SAMSON')
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         self.setModal(False)
         self.setMinimumHeight(500)
@@ -15,6 +15,7 @@ class SimpleGUI(qw.QDialog):
         self.setLayout(qw.QVBoxLayout())
         self.layout().setContentsMargins(5,5,5,5)
         self.layout().setSpacing(7)
+        qw.QApplication.setStyle(qw.QStyleFactory.create('Plastique'))
 
 
         # adding frames for each step
@@ -64,7 +65,6 @@ class SimpleGUI(qw.QDialog):
 
 
 
-
         # widgets
 
         bold_font = qg.QFont()
@@ -76,9 +76,27 @@ class SimpleGUI(qw.QDialog):
         characterinfo_header.setFont(bold_font)
         characterinfo_layout.addWidget(characterinfo_header)
 
-        characterinfo_name = qw.QLineEdit()
-        characterinfo_name.setPlaceholderText('Enter Character Asset Code...')
+        characterinfo_name = qw.QLabel('Character Name: {0}\n'.format('david'))
+        characterinfo_name.setAlignment(qc.Qt.AlignCenter)
         characterinfo_layout.addWidget(characterinfo_name)
+
+        self.descriptions = {'hair':'hair_scalp', 'chest':'chest_scalp', 'back':'back_scalp'}
+
+        self.description_surface = qw.QLabel(self.descriptions['hair'])
+
+        descriptions_dropdown_layout = qw.QFormLayout()
+
+        descriptions_label = qw.QLabel('Descriptions: ')
+        self.descriptions_dropdown = qw.QComboBox()
+        for k,v in self.descriptions.items():
+            self.descriptions_dropdown.addItem(k)
+
+        self.descriptions_dropdown.currentIndexChanged.connect(self.update_descriptionscalp_label)
+        descriptions_dropdown_layout.addRow(descriptions_label, self.descriptions_dropdown)
+
+        characterinfo_layout.addLayout(descriptions_dropdown_layout)
+
+        characterinfo_layout.addWidget(self.description_surface)
 
         # SCALP widgets
 
@@ -99,10 +117,11 @@ class SimpleGUI(qw.QDialog):
         scalpvoronoilayout.addRow(voronoi_bttn, voronoi_densitycount)
 
 
-        voronoi_bttn.clicked.connect(lambda: STB.voronoisurface(voronoi_densitycount.text()))
+        voronoi_bttn.clicked.connect(lambda: STB.voronoisurface(int(voronoi_densitycount.text())))
 
-        refreshscalp_bttn = qw.QPushButton('Refresh')
+        refreshscalp_bttn = qw.QPushButton('Refresh Scalp')
         scalplayout.addWidget(refreshscalp_bttn)
+        refreshscalp_bttn.clicked.connect(lambda: STB.refresh_scalp())
 
         exportregionmap_bttn = qw.QPushButton('Export Region Map')
         scalplayout.addWidget(exportregionmap_bttn)
@@ -114,20 +133,52 @@ class SimpleGUI(qw.QDialog):
         centerguide_header.setFont(bold_font)
         centerguidelayout.addWidget(centerguide_header)
 
+        generatecurve_layout = qw.QFormLayout()
+        generatecurve_layout.setAlignment(qc.Qt.AlignVCenter)
+        centerguidelayout.addLayout(generatecurve_layout)
+
+
         generatecurve_bttn = qw.QPushButton('Generate New Curve')
-        centerguidelayout.addWidget(generatecurve_bttn)
+        generatecurve_densitycount = qw.QLineEdit()
+        generatecurve_densitycount.setMaxLength(3)
+        generatecurve_densitycount.insert('10')
+        generatecurve_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
+        generatecurve_bttn.clicked.connect(lambda: STB.curvefromsurface(int(generatecurve_densitycount.text()), self.descriptions_dropdown.currentText()))
 
-        rebuildcurve_bttn = qw.QPushButton('Rebuild Curve')
-        centerguidelayout.addWidget(rebuildcurve_bttn)
 
-        editexistingcurve_bttn = qw.QPushButton('Edit Existing Curve')
-        centerguidelayout.addWidget(editexistingcurve_bttn)
+        generatecurve_layout.addRow(generatecurve_bttn, generatecurve_densitycount)
+
+        editcurve_bttn = qw.QPushButton('Edit Curve')
+        centerguidelayout.addWidget(editcurve_bttn)
+        editcurve_bttn.clicked.connect(lambda: STB.editcenterguide())
 
         savechangescurve_bttn = qw.QPushButton('Save Changes')
         centerguidelayout.addWidget(savechangescurve_bttn)
+        savechangescurve_bttn.clicked.connect(lambda: STB.savecenterguide_changes())
+
+        rebuildcurvelayout = qw.QFormLayout()
+        rebuildcurvelayout.setAlignment(qc.Qt.AlignVCenter)
+        centerguidelayout.addLayout(rebuildcurvelayout)
+
+        rebuildcurve_bttn = qw.QPushButton('Rebuild Curve')
+
+        rebuildcurve_densitycount = qw.QLineEdit()
+        rebuildcurve_densitycount.setMaxLength(3)
+        rebuildcurve_densitycount.insert('8')
+        rebuildcurve_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
+        rebuildcurve_bttn.clicked.connect(lambda: STB.rebuildcurve(int(rebuildcurve_densitycount.text())))
+        rebuildcurvelayout.addRow(rebuildcurve_bttn, rebuildcurve_densitycount)
+
+        centerguidelayout.addLayout(rebuildcurvelayout)
+
+        selectallcurves_bttn = qw.QPushButton('Select All CenterGuides')
+        centerguidelayout.addWidget(selectallcurves_bttn)
+        selectallcurves_bttn.clicked.connect(lambda: STB.select_curves( self.descriptions_dropdown.currentText()))
+
 
         deletecurve_bttn = qw.QPushButton('Delete CenterGuide')
         centerguidelayout.addWidget(deletecurve_bttn)
+        deletecurve_bttn.clicked.connect(lambda: STB.deleteclump())
 
 
         # TUBE widgetes
@@ -138,15 +189,22 @@ class SimpleGUI(qw.QDialog):
 
         generatenewtube_bttn = qw.QPushButton('Generate New Tube')
         tubelayout.addWidget(generatenewtube_bttn)
+        generatenewtube_bttn.clicked.connect(lambda: STB.attachtube(0.8))
 
         edittube_bttn = qw.QPushButton('Edit Tube')
         tubelayout.addWidget(edittube_bttn)
+        edittube_bttn.clicked.connect(lambda: STB.edittube())
 
-        savechangestube_bttn = qw.QPushButton('Save Changes')
-        tubelayout.addWidget(savechangestube_bttn)
+        # savechangestube_bttn = qw.QPushButton('Save Changes')
+        # tubelayout.addWidget(savechangestube_bttn)
+
+        selectalltubes_bttn = qw.QPushButton('Select All Tubes')
+        tubelayout.addWidget(selectalltubes_bttn)
+        selectalltubes_bttn.clicked.connect(lambda: STB.select_tubes( self.descriptions_dropdown.currentText()))
 
         deletetube_bttn = qw.QPushButton('Delete Tube')
         tubelayout.addWidget(deletetube_bttn)
+        deletetube_bttn.clicked.connect(lambda: STB.deletetube())
 
 
         # CURVE GEN widgets
@@ -155,11 +213,48 @@ class SimpleGUI(qw.QDialog):
         gencurves_header.setFont(bold_font)
         gencurveslayout.addWidget(gencurves_header)
 
-        filltube_bttn = qw.QPushButton('Fill Tube With Curves')
-        gencurveslayout.addWidget(filltube_bttn)
+        generateguidecurveslayout = qw.QFormLayout()
+        generateguidecurveslayout.setAlignment(qc.Qt.AlignVCenter)
+        gencurveslayout.addLayout(generateguidecurveslayout)
 
-        editguides_bttn = qw.QPushButton('Change number of Guides')
-        gencurveslayout.addWidget(editguides_bttn)
+        generate_onlyexternalguides_check = qw.QCheckBox('Generate Only Outer Guides')
+        gencurveslayout.addWidget(generate_onlyexternalguides_check)
+
+       # generate_onlyexternalguides_check.stateChanged.connect()
+
+
+        filltube_bttn = qw.QPushButton('Fill Selected Tube With Curves')
+
+        filltube_densitycount = qw.QLineEdit()
+        filltube_densitycount.setMaxLength(3)
+        filltube_densitycount.insert('2')
+        filltube_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
+        filltube_bttn.clicked.connect(lambda: STB.gencurvesfromtube(numberofcurves=int(filltube_densitycount.text()), onlyoutercurves=generate_onlyexternalguides_check.isChecked()))
+
+        generateguidecurves_bttn = qw.QPushButton('Generate Guide Curves')
+
+        gencurves_densitycount = qw.QLineEdit()
+        gencurves_densitycount.setMaxLength(3)
+        gencurves_densitycount.setClearButtonEnabled(True)
+        gencurves_densitycount.insert('2')
+        gencurves_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
+        generateguidecurves_bttn.clicked.connect(lambda: STB.gencurvesglobal(int(gencurves_densitycount.text()),onlyoutercurves=generate_onlyexternalguides_check.isChecked()))
+
+
+        generateguidecurveslayout.addRow(filltube_bttn, filltube_densitycount)
+        generateguidecurveslayout.addRow(generateguidecurves_bttn,gencurves_densitycount)
+
+        deleteguidecurves_bttn = qw.QPushButton("Delete Selected Tube's Guide Curves")
+        gencurveslayout.addWidget(deleteguidecurves_bttn)
+        deleteguidecurves_bttn.clicked.connect(lambda: STB.deleteguidecurves())
+
+        deleteallguidecurves_bttn = qw.QPushButton("Delete All Guide Curves")
+        gencurveslayout.addWidget(deleteallguidecurves_bttn)
+        deleteallguidecurves_bttn.clicked.connect(lambda: STB.remove_allguidecurves())
+
+        extractguides_bttn = qw.QPushButton('Extract Guides')
+        gencurveslayout.addWidget(extractguides_bttn)
+        extractguides_bttn.clicked.connect(lambda: STB.extract_guide_curves())
 
 
 
@@ -177,6 +272,11 @@ class SimpleGUI(qw.QDialog):
 
     def printText(self,message):
         print message
+
+    def update_descriptionscalp_label(self):
+        descriptions = self.descriptions
+        description = self.descriptions_dropdown.currentText()
+        self.description_surface.setText('Surface: ' + descriptions[description])
 
 
 
