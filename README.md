@@ -1,3 +1,3 @@
-# MayaDev
+# SAMSON
 
-A collection of tools and experiments within Autodesk's Maya
+CG/VFX Grooming Solution inspired by Disney's Tonic. A volume-driven grooming tool currently developed for Autodesk Maya.
