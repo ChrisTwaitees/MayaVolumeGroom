@@ -1,7 +1,8 @@
 import PySide2.QtCore as qc
 import PySide2.QtGui as qg
 import PySide2.QtWidgets as qw
-import SamsonTubeGroom as STB
+from Legacy import SamsonTubeGroom as STB
+
 
 class SimpleGUI(qw.QDialog):
     def __init__(self):
@@ -278,7 +279,7 @@ class SimpleGUI(qw.QDialog):
         description = self.descriptions_dropdown.currentText()
         self.description_surface.setText('Surface: ' + descriptions[description])
 
-
-
-dialog = SimpleGUI()
-dialog.show()
+def main():
+    if __name__ == "__main__":
+        dialog = SimpleGUI()
+        dialog.show()
