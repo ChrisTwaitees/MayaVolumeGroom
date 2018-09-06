@@ -68,4 +68,5 @@ def addGuide(surface):
     mc.setToolTo(follicleContext)
 
 
-addGuide(surface)
+if __name__ == "__main__":
+    addGuide(surface)
