@@ -2,7 +2,7 @@ import maya.mel as mm
 import maya.cmds as mc
 import pymel.core as pm
 import maya.OpenMaya as om
-import re
+
 import random
 
 # HDA Locations for -HoudiniAsset Load Asset

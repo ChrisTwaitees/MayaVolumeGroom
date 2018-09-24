@@ -1,3 +1,14 @@
+'''
+Creating Cylinder at the base of a selected curve,
+correctly orienting to curve's normal.
+'''
+
+'''
+Maya Intrinsic Imports
+'''
+import maya.cmds as mc
+import pymel.core as pm
+
 def addTube(selection, tubesubdivs=8):
     dt = pm.dt
 

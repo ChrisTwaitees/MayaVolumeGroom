@@ -1,8 +1,9 @@
+'''
+Maya Intrinsic Imports
+'''
 import maya.cmds as mc
 
 bad_chars = "[]"
-selection = mc.ls(selection=1, l=1)[0]
-
 
 def findCenterVector(positions):
     center = [0, 0, 0]
@@ -25,7 +26,7 @@ def fetch_tube_loops(selection, verts=True):
     return loops
 
 
-def fetchLoopCenters():
+def fetchLoopCenters(selection):
     loops = fetch_tube_loops(selection)
     loopCenters = []
 
@@ -48,6 +49,7 @@ def fetchLoopCenters():
 
 
 def createTubeCenterGuide():
-    loopCenters = fetchLoopCenters()
+    selection = mc.ls(sel=1,l=1)[0]
+    loopCenters = fetchLoopCenters(selection)
     print loopCenters
     mc.curve(p=loopCenters)

@@ -1,3 +1,16 @@
+'''
+Collection of functions used to generate
+randomized geometry colour
+cleaning geometry
+'''
+
+'''
+Maya Intrinsic Imports
+'''
+import maya.cmds as mc
+import random
+
+
 def getrandom_id():
     random.seed()
     id = random.randrange(999999999999)

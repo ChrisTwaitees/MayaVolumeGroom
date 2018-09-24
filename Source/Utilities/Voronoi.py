@@ -1,8 +1,12 @@
+'''
+Maya Intrinsic Imports
+'''
 import maya.cmds as mc
 import maya.api.OpenMaya as om
+import pymel.core as pm
+
 import random
 import geo_utils
-
 
 def fetchNumberCells():
     input = mc.promptDialog(b = ["Voronoi", "Cancel"], m = "Number of Cells", ma = "center", st = "integer", t = "VORONOI SELECTION" )

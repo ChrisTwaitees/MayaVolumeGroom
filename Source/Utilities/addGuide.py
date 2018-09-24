@@ -1,9 +1,15 @@
+'''
+Adding Curve to selected mesh at UV of ScreenSpace Selection
+'''
+
+'''
+Maya Intrinsic Imports
+'''
 import maya.cmds as mc
+import selection
 
-surface = mc.ls(selection=1, l=1)[0]
-
-
-def getUV_from_World(surface, queryPos):
+# creates a sample closest point on Mesh to sample world space
+def getuv_from_world(surface, queryPos):
     pointOnMesh = mc.createNode("closestPointOnMesh")
     surface = mc.listRelatives(surface, shapes=1, f=1)[0]
     mc.connectAttr(surface + ".outMesh", pointOnMesh + ".inMesh")
@@ -16,7 +22,8 @@ def getUV_from_World(surface, queryPos):
     return uv
 
 
-def newFollicle(surface, uv):
+# creates and connects follicle at uv location on given surface
+def new_follicle(surface, uv):
     newFollicle = mc.createNode('follicle')
     surfaceShape = mc.listRelatives(surface, shapes=1, f=1)[0]
     follicleTrans = mc.listRelatives(newFollicle, type="transform", p=1)[0]
@@ -30,6 +37,7 @@ def newFollicle(surface, uv):
     return newFollicle
 
 
+# returns a curve of defined length
 def newCurve(length, numspans):
     length = float(length)
     positions = [(0, 0, 0), (0, 0, length * 0.25), (0, 0, length * 0.75), (0, 0, length)]
@@ -38,14 +46,15 @@ def newCurve(length, numspans):
     return newCurve
 
 
+# context function
 def onPress(context):
     # create newCurveatOrigin
     newGuide = newCurve(5, 8)
     # makeSurfaceLive
     mc.makeLive(surface)
     hitPos = mc.autoPlace(um=1)
-    uv = getUV_from_World(surface, hitPos)
-    guideFollicle = newFollicle(surface, uv)
+    uv = getuv_from_world(surface, hitPos)
+    guideFollicle = new_follicle(surface, uv)
     # cleanup
     mc.makeLive(none=1)
     follicleTrans = mc.listRelatives(guideFollicle, type="transform", p=1)[0]
@@ -57,7 +66,6 @@ def onPress(context):
     decomposeMatrix = mc.createNode("decomposeMatrix")
     mc.connectAttr(follicleTrans + ".parentMatrix", decomposeMatrix + ".inputMatrix")
     mc.connectAttr(decomposeMatrix + ".outputTranslate", curveShape + ".controlPoints[0]")
-    # mc.connectAttr()
 
 
 def addGuide(surface):
@@ -69,4 +77,5 @@ def addGuide(surface):
 
 
 if __name__ == "__main__":
+    surface = selection.fetch_selection(mc = True)
     addGuide(surface)
