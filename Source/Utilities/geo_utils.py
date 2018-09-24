@@ -1,6 +1,3 @@
-import maya.cmds as mc
-import random
-
 def getrandom_id():
     random.seed()
     id = random.randrange(999999999999)
