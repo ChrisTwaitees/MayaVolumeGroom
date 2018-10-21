@@ -83,6 +83,7 @@ def Voronoi(uvs):
     scalp = mc.polyUnite(newFaces, n="scalp_test")
     mc.polyMergeVertex(scalp, d=0.25)
 
+
 def main():
     numCells = int(fetchNumberCells())
     if numCells:

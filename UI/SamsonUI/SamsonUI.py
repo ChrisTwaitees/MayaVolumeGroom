@@ -1,10 +1,9 @@
 import PySide2.QtCore as qc
 import PySide2.QtGui as qg
 import PySide2.QtWidgets as qw
-from Legacy import SamsonTubeGroom as STB
+#from Source import main
 
-
-class SimpleGUI(qw.QDialog):
+class SamsonUIMain(qw.QDialog):
     def __init__(self):
         qw.QDialog.__init__(self)
         self.setWindowTitle('SAMSON')
@@ -21,10 +20,6 @@ class SimpleGUI(qw.QDialog):
 
         # adding frames for each step
 
-        characterinfo_frame = qw.QFrame()
-        characterinfo_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
-        characterinfo_frame.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
-
         scalp_frame = qw.QFrame()
         scalp_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
 
@@ -38,9 +33,6 @@ class SimpleGUI(qw.QDialog):
         generatecurves_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
 
         # creating layouts
-
-        characterinfo_layout = qw.QVBoxLayout()
-        characterinfo_layout.setAlignment(qc.Qt.AlignVCenter)
 
         scalplayout = qw.QVBoxLayout()
         scalplayout.setContentsMargins(5,5,5,5)
@@ -58,7 +50,6 @@ class SimpleGUI(qw.QDialog):
 
         # setting layouts to frames
 
-        characterinfo_frame.setLayout(characterinfo_layout)
         scalp_frame.setLayout(scalplayout)
         centerguide_frame.setLayout(centerguidelayout)
         tube_frame.setLayout(tubelayout)
@@ -71,33 +62,6 @@ class SimpleGUI(qw.QDialog):
         bold_font = qg.QFont()
         bold_font.setBold(True)
 
-        # CHARACTER INFO WIDGETS
-
-        characterinfo_header = qw.QLabel('CHARACTER INFO\n')
-        characterinfo_header.setFont(bold_font)
-        characterinfo_layout.addWidget(characterinfo_header)
-
-        characterinfo_name = qw.QLabel('Character Name: {0}\n'.format('david'))
-        characterinfo_name.setAlignment(qc.Qt.AlignCenter)
-        characterinfo_layout.addWidget(characterinfo_name)
-
-        self.descriptions = {'hair':'hair_scalp', 'chest':'chest_scalp', 'back':'back_scalp'}
-
-        self.description_surface = qw.QLabel(self.descriptions['hair'])
-
-        descriptions_dropdown_layout = qw.QFormLayout()
-
-        descriptions_label = qw.QLabel('Descriptions: ')
-        self.descriptions_dropdown = qw.QComboBox()
-        for k,v in self.descriptions.items():
-            self.descriptions_dropdown.addItem(k)
-
-        self.descriptions_dropdown.currentIndexChanged.connect(self.update_descriptionscalp_label)
-        descriptions_dropdown_layout.addRow(descriptions_label, self.descriptions_dropdown)
-
-        characterinfo_layout.addLayout(descriptions_dropdown_layout)
-
-        characterinfo_layout.addWidget(self.description_surface)
 
         # SCALP widgets
 
@@ -257,12 +221,8 @@ class SimpleGUI(qw.QDialog):
         gencurveslayout.addWidget(extractguides_bttn)
         extractguides_bttn.clicked.connect(lambda: STB.extract_guide_curves())
 
-
-
-
         #   adding frames
 
-        self.layout().addWidget(characterinfo_frame)
         self.layout().addWidget(scalp_frame)
         self.layout().addWidget(centerguide_frame)
         self.layout().addWidget(tube_frame)
@@ -280,6 +240,5 @@ class SimpleGUI(qw.QDialog):
         self.description_surface.setText('Surface: ' + descriptions[description])
 
 def main():
-    if __name__ == "__main__":
-        dialog = SimpleGUI()
-        dialog.show()
+    dialog = SamsonUIMain()
+    return dialog.show()
