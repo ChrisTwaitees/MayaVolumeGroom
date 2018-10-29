@@ -1,9 +1,7 @@
-import sys
-
-sys.path.append("C:/Users/Chris Thwaites/PycharmProjects/Samson")
-
+print "refresh successful"
 import maya.cmds as mc
 from maya import OpenMayaUI as omui
+from maya.app.general.mayaMixin import MayaQDockWidget
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 from shiboken2 import wrapInstance
 
@@ -27,6 +25,7 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
 
         mayaMainWindowPtr = omui.MQtUtil.mainWindow()
         self.mayaMainWindow = wrapInstance(long(mayaMainWindowPtr), qw.QDialog)
+       # self.setObjectName(__class__.toolName)
 
         # Setup window's properties
         self.setWindowFlags(qc.Qt.Window)
@@ -254,7 +253,7 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
                                       qw.QMainWindow)  # Important that it's QMainWindow, and not QWidget/QDialog
         # Go through main window's children to find any previous instances
         for obj in mayaMainWindow.children():
-            if type(obj) == maya.app.general.mayaMixin.MayaQDockWidget:
+            if type(obj) == MayaQDockWidget:
                 # if obj.widget().__class__ == self.__class__: # Alternatively we can check with this, but it will fail if we re-evaluate the class
                 if obj.widget().objectName() == self.__class__.toolName:  # Compare object names
                     # If they share the same name then remove it
