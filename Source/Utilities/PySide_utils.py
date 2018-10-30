@@ -3,7 +3,7 @@ import PySide2.QtGui as qg
 import PySide2.QtWidgets as qw
 
 
-class simpleInput(qw.QDialog):
+class SimpleInput(qw.QDialog):
     def __init__(self, title, label, button):
         self.title = title
         self.label = label
@@ -18,7 +18,6 @@ class simpleInput(qw.QDialog):
         self.setLayout(qw.QVBoxLayout())
         self.layout().setContentsMargins(5, 5, 5, 5)
         self.layout().setSpacing(7)
-        qw.QApplication.setStyle(qw.QStyleFactory.create('Plastique'))
 
         # adding frames
 
@@ -50,12 +49,11 @@ class simpleInput(qw.QDialog):
 
         simple_bttn = qw.QPushButton(self.button)
         simple_entry = qw.QLineEdit()
-        simple_entry.setMaxLength(3)
         simple_entry.setClearButtonEnabled(True)
         simple_entry.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
         simple_entryLayout.addRow(simple_bttn, simple_entry)
 
-        simple_bttn.clicked.connect(lambda: self.returnText(int(simple_entry.text())))
+        simple_bttn.clicked.connect(lambda: self.returnText(simple_entry.text()))
 
         # adding frames
         self.layout().addWidget(simple_frame)
@@ -67,8 +65,70 @@ class simpleInput(qw.QDialog):
         return simple_input
 
 
-def main(title, label, button):
-    if __name__ == "__main__":
-        dialog = simpleInput(title, label, button)
-        dialog.show()
+def simpleInputMain(title, label, button):
+    simpleInputWindow = SimpleInput(title, label, button)
+    return simpleInputWindow
 
+
+class ProgressBarWindow(qw.QDialog):
+    def __init__(self, title, label):
+        self.title = title
+        self.label = label
+
+        qw.QDialog.__init__(self)
+        self.setWindowTitle(title)
+        self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
+        self.setModal(False)
+        self.setMinimumHeight(50)
+        self.setMinimumWidth(200)
+
+        self.setLayout(qw.QVBoxLayout())
+        self.layout().setContentsMargins(5, 5, 5, 5)
+        self.layout().setSpacing(7)
+
+        # adding frames
+
+        simple_frame = qw.QFrame()
+        simple_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
+        simple_frame.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
+
+        # creating layout
+
+        simple_layout = qw.QVBoxLayout()
+        simple_layout.setAlignment(qc.Qt.AlignVCenter)
+
+        # setting layout to frame
+
+        simple_frame.setLayout(simple_layout)
+
+        # WIDGETS
+
+        bold_font = qg.QFont()
+        bold_font.setBold(True)
+
+        self.simple_label = qw.QLabel(self.label)
+        self.simple_label.setFont(bold_font)
+        self.simple_label.setAlignment(qc.Qt.AlignHCenter)
+        simple_layout.addWidget(self.simple_label)
+
+        # ProgressBar
+
+        self.simple_progressBar = qw.QProgressBar()
+        self.simple_progressBar.setAlignment(qc.Qt.AlignHCenter)
+        simple_layout.addWidget(self.simple_progressBar)
+
+        # adding frames
+        self.layout().addWidget(simple_frame)
+
+    # FUNCTIONS
+
+    def updateProgress(self, percentile):
+        self.simple_progressBar.setValue(percentile)
+
+    def updateLabel(self, updateText):
+        self.simple_label.setText(updateText)
+
+
+def simpleProgressBarWindow(title, label):
+    progressBar = ProgressBarWindow(title, label)
+    return progressBar
