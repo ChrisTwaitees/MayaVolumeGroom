@@ -1,17 +1,16 @@
-print "refresh successful"
-import maya.cmds as mc
+# maya imports for dockable functionality
 from maya import OpenMayaUI as omui
 from maya.app.general.mayaMixin import MayaQDockWidget
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 from shiboken2 import wrapInstance
 
-from PySide2 import __version__
+# Qt imports
 import PySide2.QtCore as qc
 import PySide2.QtGui as qg
 import PySide2.QtWidgets as qw
 
+#Samson Imports
 from Source import main as STB
-from UI.SamsonUI import SamsonUI_utils as utils
 
 
 class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
@@ -25,7 +24,6 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
 
         mayaMainWindowPtr = omui.MQtUtil.mainWindow()
         self.mayaMainWindow = wrapInstance(long(mayaMainWindowPtr), qw.QDialog)
-       # self.setObjectName(__class__.toolName)
 
         # Setup window's properties
         self.setWindowFlags(qc.Qt.Window)
@@ -37,7 +35,7 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         self.setLayout(qw.QVBoxLayout())
         self.layout().setContentsMargins(5, 5, 5, 5)
         self.layout().setSpacing(7)
-        qw.QApplication.setStyle(qw.QStyleFactory.create('Plastique'))
+
 
         # adding frames for each step
 
@@ -87,14 +85,16 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         scalplayout.addWidget(scalp_header)
 
         scalpvoronoilayout = qw.QFormLayout()
-        scalpvoronoilayout.setAlignment(qc.Qt.AlignVCenter)
+        scalpvoronoilayout.setHorizontalSpacing(5)
+        scalpvoronoilayout.setFormAlignment(qc.Qt.AlignVCenter)
+        scalpvoronoilayout.setRowWrapPolicy(qw.QFormLayout.WrapLongRows)
         scalplayout.addLayout(scalpvoronoilayout)
 
-        voronoi_surface_entry = qw.QLineEdit()
-        voronoi_surface_entry.setClearButtonEnabled(True)
-        voronoi_surface_entry.insert("Select Surface")
+        self.voronoi_surface_entry = qw.QLabel()
+        self.voronoi_surface_entry.setText("Select Surface")
         voronoi_surface_button = qw.QPushButton('<<')
-        scalpvoronoilayout.addRow(voronoi_surface_entry, voronoi_surface_button)
+        voronoi_surface_button.clicked.connect(lambda: self.setScalpShape())
+        scalpvoronoilayout.addRow(self.voronoi_surface_entry, voronoi_surface_button)
 
         voronoi_bttn = qw.QPushButton('Voronoi Surface')
         voronoi_densitycount = qw.QLineEdit()
@@ -104,7 +104,8 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         voronoi_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
         scalpvoronoilayout.addRow(voronoi_bttn, voronoi_densitycount)
 
-        voronoi_bttn.clicked.connect(lambda: STB.utils.Voronoi(int(voronoi_densitycount.text())))
+        #voronoi_bttn.clicked.connect(lambda: STB.utils.voronoi.main(int(voronoi_densitycount.text())))
+        voronoi_bttn.clicked.connect(lambda: STB.utils.voronoi.main(self.voronoi_surface_entry.text()))
 
         refreshscalp_bttn = qw.QPushButton('Refresh Scalp')
         scalplayout.addWidget(refreshscalp_bttn)
@@ -246,6 +247,12 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         self.layout().addWidget(generatecurves_frame)
 
     # functions
+
+    def setScalpShape(self):
+        scalp = STB.utils.selection.fetch_selection(shape=True)
+        self.voronoi_surface_entry.setText(scalp)
+        print "Scalp shape has been set to : %s"%scalp
+
 
     def deleteInstances(self):
         mayaMainWindowPtr = omui.MQtUtil.mainWindow()
