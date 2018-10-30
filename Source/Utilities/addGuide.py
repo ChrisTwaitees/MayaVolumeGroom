@@ -77,5 +77,5 @@ def addGuide(surface):
 
 
 if __name__ == "__main__":
-    surface = selection.fetch_selection(mc = True)
+    surface = selection.fetch_selection(cmds= True)
     addGuide(surface)

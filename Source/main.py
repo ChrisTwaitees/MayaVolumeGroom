@@ -21,4 +21,4 @@ def test_print(message):
 
 
 def print_selection():
-    print utils.selection.fetch_selection(mc=True, shape=True)
+    print utils.selection.fetch_selection(cmds=True, shape=True)

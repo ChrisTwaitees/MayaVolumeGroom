@@ -7,5 +7,5 @@ import fetchUserInput
 import geo_utils
 import guide_utils
 import selection
-import Voronoi
+import voronoi
 import PySide_utils
