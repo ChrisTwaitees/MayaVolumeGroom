@@ -13,6 +13,7 @@ import PySide2.QtWidgets as qw
 from Source import main as STB
 
 
+
 class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
     toolName = 'SamsonUI'
 
@@ -43,10 +44,15 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         scalp_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
 
         centerguide_frame = qw.QFrame()
+        centerguide_frame.setSizePolicy(qw.QSizePolicy.MinimumExpanding,qw.QSizePolicy.MinimumExpanding)
         centerguide_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
 
         tube_frame = qw.QFrame()
+        tube_frame.setSizePolicy(qw.QSizePolicy.MinimumExpanding,qw.QSizePolicy.MinimumExpanding)
         tube_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
+
+        centerguide_tube_frame = qw.QFrame()
+        centerguide_tube_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
 
         generatecurves_frame = qw.QFrame()
         generatecurves_frame.setFrameStyle(qw.QFrame.Panel | qw.QFrame.Raised)
@@ -63,15 +69,23 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         tubelayout = qw.QVBoxLayout()
         tubelayout.setAlignment(qc.Qt.AlignVCenter)
 
+        centerguide_tube_layout = qw.QGridLayout()
+        centerguide_tube_layout.setAlignment(qc.Qt.AlignHCenter)
+
         gencurveslayout = qw.QVBoxLayout()
-        gencurveslayout.setAlignment(qc.Qt.AlignVCenter)
 
         # setting layouts to frames
 
         scalp_frame.setLayout(scalplayout)
         centerguide_frame.setLayout(centerguidelayout)
         tube_frame.setLayout(tubelayout)
+        centerguide_tube_frame.setLayout(centerguide_tube_layout)
         generatecurves_frame.setLayout(gencurveslayout)
+
+        # parenting frames
+
+        centerguide_tube_layout.addWidget(centerguide_frame,0,0)
+        centerguide_tube_layout.addWidget(tube_frame,0,1)
 
         # widgets
 
@@ -86,7 +100,7 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
 
         scalpvoronoilayout = qw.QFormLayout()
         scalpvoronoilayout.setHorizontalSpacing(5)
-        scalpvoronoilayout.setFormAlignment(qc.Qt.AlignVCenter)
+        scalpvoronoilayout.setFormAlignment(qc.Qt.AlignHCenter)
         scalpvoronoilayout.setRowWrapPolicy(qw.QFormLayout.WrapLongRows)
         scalplayout.addLayout(scalpvoronoilayout)
 
@@ -96,16 +110,11 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         voronoi_surface_button.clicked.connect(lambda: self.setScalpShape())
         scalpvoronoilayout.addRow(self.voronoi_surface_entry, voronoi_surface_button)
 
-        voronoi_bttn = qw.QPushButton('Voronoi Surface')
-        voronoi_densitycount = qw.QLineEdit()
-        voronoi_densitycount.setMaxLength(3)
-        voronoi_densitycount.setClearButtonEnabled(True)
-        voronoi_densitycount.insert('50')
-        voronoi_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
-        scalpvoronoilayout.addRow(voronoi_bttn, voronoi_densitycount)
 
-        #voronoi_bttn.clicked.connect(lambda: STB.utils.voronoi.main(int(voronoi_densitycount.text())))
+        voronoi_bttn = qw.QPushButton('Voronoi Scalp')
+        voronoi_bttn.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
         voronoi_bttn.clicked.connect(lambda: STB.utils.voronoi.main(self.voronoi_surface_entry.text()))
+        scalplayout.addWidget(voronoi_bttn)
 
         refreshscalp_bttn = qw.QPushButton('Refresh Scalp')
         scalplayout.addWidget(refreshscalp_bttn)
@@ -120,23 +129,23 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         centerguide_header.setFont(bold_font)
         centerguidelayout.addWidget(centerguide_header)
 
+        #generate guide
         generatecurve_layout = qw.QFormLayout()
         generatecurve_layout.setAlignment(qc.Qt.AlignVCenter)
         centerguidelayout.addLayout(generatecurve_layout)
 
-        generatecurve_bttn = qw.QPushButton('Generate New Curve')
-        generatecurve_densitycount = qw.QLineEdit()
-        generatecurve_densitycount.setMaxLength(3)
-        generatecurve_densitycount.insert('10')
-        generatecurve_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
-        generatecurve_bttn.clicked.connect(lambda: STB.curvefromsurface(int(generatecurve_densitycount.text()),
-                                                                        self.descriptions_dropdown.currentText()))
-
-        generatecurve_layout.addRow(generatecurve_bttn, generatecurve_densitycount)
+        generatecurve_bttn = qw.QPushButton('Add Guide')
+        self.generatecurve_bttn_densitycount = qw.QLineEdit()
+        self.generatecurve_bttn_densitycount.setMaxLength(3)
+        self.generatecurve_bttn_densitycount.insert('5')
+        self.generatecurve_bttn_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
+        generatecurve_layout.addRow(generatecurve_bttn, self.generatecurve_bttn_densitycount)
+        generatecurve_bttn.clicked.connect(lambda: STB.utils.addGuide.main(self.voronoi_surface_entry.text(),
+                                                                           self.generatecurve_bttn_densitycount.text()))
 
         editcurve_bttn = qw.QPushButton('Edit Curve')
         centerguidelayout.addWidget(editcurve_bttn)
-        editcurve_bttn.clicked.connect(lambda: STB.editcenterguide())
+        editcurve_bttn.clicked.connect(lambda: STB.editcenterguide(self.voronoi_surface_entry.text()))
 
         savechangescurve_bttn = qw.QPushButton('Save Changes')
         centerguidelayout.addWidget(savechangescurve_bttn)
@@ -242,8 +251,9 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         #   adding frames
 
         self.layout().addWidget(scalp_frame)
-        self.layout().addWidget(centerguide_frame)
-        self.layout().addWidget(tube_frame)
+        #self.layout().addWidget(centerguide_frame)
+        #self.layout().addWidget(tube_frame)
+        self.layout().addWidget(centerguide_tube_frame)
         self.layout().addWidget(generatecurves_frame)
 
     # functions
