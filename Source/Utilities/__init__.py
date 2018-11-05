@@ -8,4 +8,4 @@ import geo_utils
 import guide_utils
 import selection
 import voronoi
-import PySide_utils
+import pyside_utils

@@ -3,10 +3,11 @@ Maya Intrinsic Imports
 '''
 import maya.cmds as mc
 import maya.api.OpenMaya as om
-import pymel.core as pm
 
 import random
 import geo_utils
+import pyside_utils
+
 
 def fetchNumberCells():
     input = mc.promptDialog(b = ["Voronoi", "Cancel"], m = "Number of Cells", ma = "center", st = "integer", t = "VORONOI SELECTION" )
@@ -17,7 +18,8 @@ def fetchNumberCells():
         return 0
 
 
-def getSelectionSurface():
+def getSelectionSurface(selection):
+    mc.select(selection)
     mcSelection = mc.ls(selection=1, l=1)[0]
     selList = om.MGlobal.getActiveSelectionList()
     path = selList.getDagPath(0)
@@ -46,14 +48,22 @@ def WS_from_UV(uv, MfnMesh):
     return (pos[0], pos[1], pos[2])
 
 
-def Voronoi(uvs):
+def Voronoi(uvs, selection):
     try:
-        mcSelection = getSelectionSurface()[0]
-        surface = getSelectionSurface()[1]
+        originalName = selection
+        mcSelection = getSelectionSurface(selection)[0]
+        surface = getSelectionSurface(selection)[1]
+
     except (IndexError):
         return
     centers = [WS_from_UV(uv, surface) for uv in uvs if WS_from_UV(uv, surface)[0]]
     newFaces = []
+
+    #create progress bar
+    progressBarWindow = pyside_utils.SimpleProgressBar("Voronoi Cells", "Dividing 0/{0}".format(len(centers)))
+    progressBarWindow.show()
+    #setting cursor to wait cursor
+    pyside_utils.qw.QApplication.setOverrideCursor(pyside_utils.qc.Qt.WaitCursor)
 
     for i, from_point in enumerate(centers):
         working_geom = mc.duplicate(mcSelection)
@@ -79,16 +89,27 @@ def Voronoi(uvs):
 
                 newFaces.append(working_geom[0])
 
+                #update progressbar
+                progressBarWindow.updateLabel("Dividing {0}/{1}".format(i, len(centers)))
+                progressBarWindow.updateProgress( len(centers)/(i+1.0)*100.0)
+
+
+    #removing progressbar
+    pyside_utils.qw.QApplication.restoreOverrideCursor()
+    progressBarWindow.hide()
+    progressBarWindow.deleteLater()
+
+
     mc.delete(mcSelection)
-    scalp = mc.polyUnite(newFaces, n="scalp_test")
+    scalp = mc.polyUnite(newFaces, n= originalName)
     mc.polyMergeVertex(scalp, d=0.25)
 
 
-def main():
+def main(surface):
     numCells = int(fetchNumberCells())
     if numCells:
         uvs = randomUVs(numCells)
-        Voronoi(uvs)
+        Voronoi(uvs, surface)
     else:
         print "User Cancelled Voronoi"
         return

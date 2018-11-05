@@ -9,7 +9,8 @@ import maya.cmds as mc
 
 
 class AddGuide():
-    def __init__(self, surface):
+    def __init__(self, surface, numspans):
+        self.numspans = numspans
         self.surface = surface
         self.context = "follicleContext"
 
@@ -46,11 +47,10 @@ class AddGuide():
 
 
     # returns a curve of defined length
-    def newCurve(self, length, numspans):
+    def newCurve(self, length):
         length = float(length)
         positions = [(0, 0, 0), (0, 0, length * 0.25), (0, 0, length * 0.75), (0, 0, length)]
         newCurve = mc.curve(p=positions)
-        mc.rebuildCurve(newCurve, spans=numspans, keepEndPoints=1)
         return newCurve
 
 
@@ -58,7 +58,7 @@ class AddGuide():
     def onPress(self):
         # create newCurveatOrigin
         print "creating a newcurve"
-        newGuide = self.newCurve(5, 8)
+        newGuide = self.newCurve(5)
         # makeSurfaceLive
         print "making surface live"
         mc.makeLive(self.surface)
@@ -89,9 +89,9 @@ class AddGuide():
         mc.setToolTo(self.context)
         print "set tool to follicle context"
 
-def main(surface):
+def main(surface, numspans):
     print "Adding Guide..."
-    AddGuide(surface).addGuide()
+    AddGuide(surface, numspans).addGuide()
 
 
 #TO STUDY:

@@ -70,7 +70,7 @@ def simpleInputMain(title, label, button):
     return simpleInputWindow
 
 
-class ProgressBarWindow(qw.QDialog):
+class SimpleProgressBar(qw.QDialog):
     def __init__(self, title, label):
         self.title = title
         self.label = label
@@ -129,6 +129,6 @@ class ProgressBarWindow(qw.QDialog):
         self.simple_label.setText(updateText)
 
 
-def simpleProgressBarWindow(title, label):
-    progressBar = ProgressBarWindow(title, label)
+def simpleProgressBarMain(title, label):
+    progressBar = SimpleProgressBar(title, label)
     return progressBar
