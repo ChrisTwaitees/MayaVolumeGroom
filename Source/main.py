@@ -13,7 +13,7 @@ import pymel.core as pm
 '''
 Necessary Modules
 '''
-import utilities as utils
+import Utilities as utils
 
 
 def test_print(message):
