@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
-    <orderEntry type="inheritedJdk" />
+    <content url="file://$MODULE_DIR$/../Maya_Pipeline/Utils">
+      <sourceFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/ui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/maya" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/animation" />
+      <excludeFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/export" />
+      <excludeFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/math" />
+      <excludeFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/paths" />
+      <excludeFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/rigging" />
+      <excludeFolder url="file://$MODULE_DIR$/../Maya_Pipeline/Utils/skinning" />
+    </content>
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/plugin" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/source" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/utils" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="MayaPy 2.7 (Samson)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="R User Library" level="project" />
+    <orderEntry type="library" name="R Skeletons" level="application" />
   </component>
   <component name="TestRunnerService">
     <option name="PROJECT_TEST_RUNNER" value="Unittests" />

@@ -13,7 +13,7 @@ import pymel.core as pm
 '''
 Necessary Modules
 '''
-import Utilities as utils
+import utils as utils
 
 
 def test_print(message):
@@ -21,4 +21,4 @@ def test_print(message):
 
 
 def print_selection():
-    print utils.selection.fetch_selection(cmds=True, shape=True)
+    print Utilities.selection.fetch_selection(cmds=True, shape=True)

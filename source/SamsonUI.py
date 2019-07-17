@@ -10,9 +10,10 @@ import PySide2.QtGui as qg
 import PySide2.QtWidgets as qw
 
 #Samson Imports
-from Source import main as STB
+from source import main as STB
 
-
+# import Maya_Pipeline UI
+from Utils import ui
 
 class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
     toolName = 'SamsonUI'
@@ -113,7 +114,7 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
 
         voronoi_bttn = qw.QPushButton('Voronoi Scalp')
         voronoi_bttn.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
-        voronoi_bttn.clicked.connect(lambda: STB.utils.voronoi.main(self.voronoi_surface_entry.text()))
+        voronoi_bttn.clicked.connect(lambda: Utilities.voronoi.main(self.voronoi_surface_entry.text()))
         scalplayout.addWidget(voronoi_bttn)
 
         refreshscalp_bttn = qw.QPushButton('Refresh Scalp')
@@ -140,7 +141,7 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
         self.generatecurve_bttn_densitycount.insert('5')
         self.generatecurve_bttn_densitycount.setSizePolicy(qw.QSizePolicy.Minimum, qw.QSizePolicy.Minimum)
         generatecurve_layout.addRow(generatecurve_bttn, self.generatecurve_bttn_densitycount)
-        generatecurve_bttn.clicked.connect(lambda: STB.utils.addGuide.main(self.voronoi_surface_entry.text(),
+        generatecurve_bttn.clicked.connect(lambda: Utilities.addGuide.main(self.voronoi_surface_entry.text(),
                                                                            self.generatecurve_bttn_densitycount.text()))
 
         editcurve_bttn = qw.QPushButton('Edit Curve')
@@ -259,7 +260,7 @@ class SamsonUIMain(MayaQWidgetDockableMixin, qw.QDialog):
     # functions
 
     def setScalpShape(self):
-        scalp = STB.utils.selection.fetch_selection(shape=True)
+        scalp = Utilities.selection.fetch_selection(shape=True)
         self.voronoi_surface_entry.setText(scalp)
         print "Scalp shape has been set to : %s"%scalp
 
@@ -289,7 +290,7 @@ def DockableWidgetUIScript(restore=False):
     global customMixinWindow
 
     ''' When the control is restoring, the workspace control has already been created and
-        all that needs to be done is restoring its UI.
+        all that needs to be done is restoring its ui.
     '''
     if restore == True:
         # Grab the created workspace control with the following.
