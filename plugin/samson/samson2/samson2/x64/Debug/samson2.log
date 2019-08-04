@@ -1,0 +1,5 @@
+﻿cl : Command line warning D9002: ignoring unknown option '/export:initializePlugin'
+cl : Command line warning D9002: ignoring unknown option '/export:uninitializePlugin'
+  samson.cpp
+C:\Users\ChrisThwaites\Desktop\Samson\samson\samson2\samson2\samson.cpp(156): warning C4018: '<': signed/unsigned mismatch
+  samson2.vcxproj -> C:\Users\ChrisThwaites\Desktop\Samson\samson\samson2\x64\Debug\samson2.mll
