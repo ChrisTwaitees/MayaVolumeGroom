@@ -5,6 +5,8 @@ import pymel.core as pm
 
 from ..utils import pyside
 reload(pyside)
+import shelf
+import toolbar
 from ..utils import selection
 reload(selection)
 from ..utils import environment
@@ -154,10 +156,27 @@ class SamsonUIMain(pyside.SimpleToolWindow):
         print num_guides
 
 
+class SamsonShelf(shelf.SamsonShelf):
+    def __init__(self):
+        super(SamsonShelf, self).__init()
+        print "Building Samson Shelf"
+        self.add_buttons()
+        self.build()
 
+    def add_buttons(self):
+        self.addButton(label="Samson", command=self.samsonUI_callback)
+
+    # callbacks
+    def samsonUI_callback(self):
+        SamsonUIMain().run()
 
 
 def main():
+    # create menu
     SamsonUIMain().run()
+    # refresh toolbar
+    toolbar.SamsonToolBar()
+    # refresh shelf
+    shelf.SamsonShelf()
 
 
