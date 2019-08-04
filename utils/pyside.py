@@ -44,10 +44,11 @@ def set_application_stylesheet(app, style="dark"):
     if os.path.exists(style_path):
         with open(style_path) as f:
             style_txt = f.read().replace("%STYLE%", style_dir_path.replace("\\", "/"))
+            app.setStyleSheet(style_txt)
     else:
         print "style %s not found" % style
         return
-    app.setStyleSheet(style_txt)
+
 
 
 # QUICK UTILS - widgets
@@ -129,7 +130,7 @@ class SimpleToolWindow(SimpleDockableWindow):
     """
     Base Class for Tool Windows
     """
-    def __init__(self, tool_name="SimpleToolWindow", dockable=True, logger=True):
+    def __init__(self, tool_name="SimpleToolWindow", dockable=True, logger=True, stylesheet = "darkorange"):
         self.delete_instances()
         super(SimpleToolWindow, self).__init__()
         self.setParent(MAYA_MAIN_WINDOW)
@@ -160,7 +161,7 @@ class SimpleToolWindow(SimpleDockableWindow):
         self.center()
 
         # Default Style Sheet
-        set_application_stylesheet(self, "darkorange")
+        set_application_stylesheet(self, stylesheet)
 
     def sw_create_menu_toolbar(self):
         self.helpBar = SimpleHelpToolBar(self)
@@ -679,11 +680,13 @@ class SimpleLabelledButton(QWidget):
     """
     Adds Label to Button
     """
-    def __init__(self, button_label="", button_callback=None, tip="", label="", reverse=False):
+    def __init__(self, button_label="", button_callback=None, tip="", label="", reverse=False,
+                 standard_icon_name=""):
         super(SimpleLabelledButton, self).__init__()
         self.button_label = button_label
         self.setToolTip(tip)
         self.button_callback = button_callback
+        self.icon_name = standard_icon_name
 
         self.label_text = label
         self.reverse = reverse
@@ -699,6 +702,8 @@ class SimpleLabelledButton(QWidget):
         self.button = create_button(text=self.button_label,
                                     callback = self.button_callback,
                                     tip="")
+        if len(self.icon_name):
+            self.button.setIcon(get_standard_icon(self, self.icon_name))
         self.label = QLabel(self.label_text)
 
         if self.reverse:
@@ -752,6 +757,45 @@ class SimpleCheckableButton(QWidget):
     def addCheckBox(self, checkbox_widget):
         self.checkbox_layout.addWidget(checkbox_widget)
 
+
+class SimpleButtonLineEdit(QWidget):
+    """
+    Button with entry
+    """
+    def __init__(self, button_label="", button_callback=None, tip="", label="", reverse=False):
+        super(SimpleButtonLineEdit, self).__init__()
+        self.button_label = button_label
+        self.setToolTip(tip)
+        self.button_callback = button_callback
+
+        self.label_text = label
+        self.reverse = reverse
+
+        self.create_layout()
+        self.create_widgets()
+
+    def create_layout(self):
+        self.layout = QHBoxLayout()
+        self.setLayout(self.layout)
+
+    def create_widgets(self):
+        self.button = create_button(text=self.button_label,
+                                    callback = self.button_callback,
+                                    tip="")
+        self.entry = QLineEdit(self.label_text)
+
+        if self.reverse:
+            self.layout.addWidget(self.entry)
+            self.layout.addWidget(self.button)
+        else:
+            self.layout.addWidget(self.button)
+            self.layout.addWidget(self.entry)
+
+    def set_text(self, text):
+        self.entry.setText(text)
+
+    def get_entry(self):
+        return self.entry.text()
 
 # SIMPLE WIDGETS - User Input
 class SimpleUserInput(QInputDialog):

@@ -5,7 +5,7 @@ import maya.cmds as mc
 import maya.api.OpenMaya as om
 
 import random
-import utils.geo
+from ..utils import geo
 
 
 def fetchNumberCells():

@@ -1,254 +1,160 @@
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
+import pymel.core as pm
 
-from utils import pyside
+from ..utils import pyside
+reload(pyside)
+from ..utils import selection
+reload(selection)
+from ..utils import environment
+reload(environment)
+from ..core import voronoi
+from ..core import guides
+from ..core import cells
+reload(cells)
 
 
-#Samson Imports
-global STB
+# setting up environment for Samson
+environment.load_plugins()
+
 
 class SamsonUIMain(pyside.SimpleToolWindow):
-    toolName = 'SamsonUI'
-
     def __init__(self, parent=None):
-        super(self.__class__, self).__init__()
-        # Setup window's properties
-        self.setWindowTitle('SAMSON')
-        self.setModal(False)
-        self.setMinimumHeight(700)
-        self.setMinimumWidth(300)
+        super(self.__class__, self).__init__(logger=False, tool_name="SAMSON")
+        self.create_layout()
+        self.create_widgets()
 
-        self.setLayout(QVBoxLayout())
-        self.layout().setContentsMargins(5, 5, 5, 5)
-        self.layout().setSpacing(7)
-
-
-        # adding frames for each step
-
-        scalp_frame = QFrame()
-        scalp_frame.setFrameStyle(QFrame.Panel | QFrame.Raised)
-
-        centerguide_frame = QFrame()
-        centerguide_frame.setSizePolicy(QSizePolicy.MinimumExpanding,QSizePolicy.MinimumExpanding)
-        centerguide_frame.setFrameStyle(QFrame.Panel | QFrame.Raised)
-
-        tube_frame = QFrame()
-        tube_frame.setSizePolicy(QSizePolicy.MinimumExpanding,QSizePolicy.MinimumExpanding)
-        tube_frame.setFrameStyle(QFrame.Panel | QFrame.Raised)
-
-        centerguide_tube_frame = QFrame()
-        centerguide_tube_frame.setFrameStyle(QFrame.Panel | QFrame.Raised)
-
-        generatecurves_frame = QFrame()
-        generatecurves_frame.setFrameStyle(QFrame.Panel | QFrame.Raised)
-
+    def create_layout(self):
         # creating layouts
 
-        scalplayout = QVBoxLayout()
-        scalplayout.setContentsMargins(5, 5, 5, 5)
-        scalplayout.setAlignment(Qt.AlignVCenter)
+        # Scalp
+        self.scalp_widget = pyside.SimplePanelledVBoxWidget()
+        self.addWidget(self.scalp_widget)
 
-        centerguidelayout = QVBoxLayout()
-        centerguidelayout.setAlignment(Qt.AlignVCenter)
+        # Centerguide
+        self.centerguide_widget = pyside.SimplePanelledVBoxWidget()
+        self.addWidget(self.centerguide_widget)
 
-        tubelayout = QVBoxLayout()
-        tubelayout.setAlignment(Qt.AlignVCenter)
+        # Tube
+        self.tube_widget = pyside.SimplePanelledVBoxWidget()
+        self.addWidget(self.tube_widget)
 
-        centerguide_tube_layout = QGridLayout()
-        centerguide_tube_layout.setAlignment(Qt.AlignHCenter)
+        # Curves
+        self.guides_widget = pyside.SimplePanelledVBoxWidget()
+        self.addWidget(self.guides_widget)
 
-        gencurveslayout = QVBoxLayout()
-
-        # setting layouts to frames
-
-        scalp_frame.setLayout(scalplayout)
-        centerguide_frame.setLayout(centerguidelayout)
-        tube_frame.setLayout(tubelayout)
-        centerguide_tube_frame.setLayout(centerguide_tube_layout)
-        generatecurves_frame.setLayout(gencurveslayout)
-
-        # parenting frames
-
-        centerguide_tube_layout.addWidget(centerguide_frame,0,0)
-        centerguide_tube_layout.addWidget(tube_frame,0,1)
-
-        # widgets
-
-        bold_font = QFont()
-        bold_font.setBold(True)
+    def create_widgets(self):
 
         # SCALP widgets
+            #header
+        self.scalp_widget.addWidget(pyside.create_label("SCALP"))
+            # surface
+        self.scalp_surface_button = pyside.SimpleLabelledButton(button_label="Select Mesh",
+                                                                button_callback = self.set_scalp_surface_callback,
+                                                                tip="Select mesh you wish to groom.")
+        self.scalp_widget.addWidget(self.scalp_surface_button)
+            # add new cell
+        add_cell_bttn = pyside.SimpleLabelledButton(label="Add New Cell", tip="Draw new Cell on Samson Surface.",
+                                                    button_callback=self.add_new_cell_callback,
+                                                    standard_icon_name="Add", reverse=True)
+        self.scalp_widget.addWidget(add_cell_bttn)
 
-        scalp_header = QLabel('SCALP')
-        scalp_header.setFont(bold_font)
-        scalplayout.addWidget(scalp_header)
+            # voronoi
+        voronoi_bttn = pyside.create_button(text="Voronoi Mesh", tip="Cuts the mesh into voronoi patterned cells."
+                                                                     "Number of cells defined by user.",
+                                            callback=self.voronoi_callback)
+        self.scalp_widget.addWidget(voronoi_bttn)
 
-        scalpvoronoilayout = QFormLayout()
-        scalpvoronoilayout.setHorizontalSpacing(5)
-        scalpvoronoilayout.setFormAlignment(Qt.AlignHCenter)
-        scalpvoronoilayout.setRowWrapPolicy(QFormLayout.WrapLongRows)
-        scalplayout.addLayout(scalpvoronoilayout)
-
-        self.voronoi_surface_entry = QLabel()
-        self.voronoi_surface_entry.setText("Select Surface")
-        voronoi_surface_button = QPushButton('<<')
-        voronoi_surface_button.clicked.connect(lambda: self.setScalpShape())
-        scalpvoronoilayout.addRow(self.voronoi_surface_entry, voronoi_surface_button)
-
-
-        voronoi_bttn = QPushButton('Voronoi Scalp')
-        voronoi_bttn.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        # voronoi_bttn.clicked.connect(lambda: Utilities.voronoi.main(self.voronoi_surface_entry.text()))
-        scalplayout.addWidget(voronoi_bttn)
-
-        refreshscalp_bttn = QPushButton('Refresh Scalp')
-        scalplayout.addWidget(refreshscalp_bttn)
-        refreshscalp_bttn.clicked.connect(lambda: STB.refresh_scalp())
-
-        exportregionmap_bttn = QPushButton('Export Region Map')
-        scalplayout.addWidget(exportregionmap_bttn)
+        ## ----------------------------------------##
 
         # CENTERGUIDE widgets
+            # header
+        self.centerguide_widget.addWidget(pyside.create_label("CENTERGUIDES"))
+            # add guide
+        self.add_guide_bttn = pyside.SimpleButtonLineEdit(button_label="Add Guide",
+                                                          button_callback=self.add_guide_callback,
+                                                          tip="Opens Add Guide Context Tool",
+                                                          label="5", reverse=True)
+        self.centerguide_widget.addWidget(self.add_guide_bttn)
+            # rebuild guide
+        self.rebuild_guide_bttn = pyside.SimpleButtonLineEdit(button_label="Resample Guides",
+                                                              button_callback=self.rebuild_guides_callback,
+                                                              tip="Rebuilds Selected Guides",
+                                                              label="8", reverse=True)
+        self.centerguide_widget.addWidget(self.rebuild_guide_bttn)
+            # select all guides
+        select_all_guides_bttn = pyside.create_button(text="Select all Guides", tip="Selects all Samson centerguides.",
+                                                      callback=self.select_all_guides_callback)
+        self.centerguide_widget.addWidget(select_all_guides_bttn)
 
-        centerguide_header = QLabel('CENTERGUIDE')
-        centerguide_header.setFont(bold_font)
-        centerguidelayout.addWidget(centerguide_header)
+        ## ----------------------------------------##
 
-        #generate guide
-        generatecurve_layout = QFormLayout()
-        generatecurve_layout.setAlignment(Qt.AlignVCenter)
-        centerguidelayout.addLayout(generatecurve_layout)
+        # TUBE widgets
+            # header
+        self.tube_widget.addWidget(pyside.create_label("TUBE"))
+            # new tube
+        new_tube_bttn = pyside.create_button(text="Add Tube",
+                                             callback=self.add_tube_callback,
+                                             tip="Creates Samson Tube Volume from either centerguide or "
+                                                 "new cell.")
+        self.tube_widget.addWidget(new_tube_bttn)
 
-        generatecurve_bttn = QPushButton('Add Guide')
-        self.generatecurve_bttn_densitycount = QLineEdit()
-        self.generatecurve_bttn_densitycount.setMaxLength(3)
-        self.generatecurve_bttn_densitycount.insert('5')
-        self.generatecurve_bttn_densitycount.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        generatecurve_layout.addRow(generatecurve_bttn, self.generatecurve_bttn_densitycount)
-        # generatecurve_bttn.clicked.connect(lambda: Utilities.addGuide.main(self.voronoi_surface_entry.text(),
-        #                                                                    self.generatecurve_bttn_densitycount.text()))
+        ## ----------------------------------------##
 
-        editcurve_bttn = QPushButton('Edit Curve')
-        centerguidelayout.addWidget(editcurve_bttn)
-        editcurve_bttn.clicked.connect(lambda: STB.editcenterguide(self.voronoi_surface_entry.text()))
+        # GUIDES widgets
+            # header
+        self.guides_widget.addWidget(pyside.create_label("GENERATE GUIDES"))
 
-        savechangescurve_bttn = QPushButton('Save Changes')
-        centerguidelayout.addWidget(savechangescurve_bttn)
-        savechangescurve_bttn.clicked.connect(lambda: STB.savecenterguide_changes())
+        self.build_guides_bttn = pyside.SimpleButtonLineEdit(button_label="Build Guides",
+                                                              button_callback=self.build_guides_callback,
+                                                              tip="Creates guides from Center Guide or Tube",
+                                                              label="8", reverse=True)
 
-        rebuildcurvelayout = QFormLayout()
-        rebuildcurvelayout.setAlignment(Qt.AlignVCenter)
-        centerguidelayout.addLayout(rebuildcurvelayout)
+        self.guides_widget.addWidget(self.build_guides_bttn)
 
-        rebuildcurve_bttn = QPushButton('Rebuild Curve')
+    # getters
+    def get_surface(self):
+        return self.scalp_surface_button.label.text()
 
-        rebuildcurve_densitycount = QLineEdit()
-        rebuildcurve_densitycount.setMaxLength(3)
-        rebuildcurve_densitycount.insert('8')
-        rebuildcurve_densitycount.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        rebuildcurve_bttn.clicked.connect(lambda: STB.rebuildcurve(int(rebuildcurve_densitycount.text())))
-        rebuildcurvelayout.addRow(rebuildcurve_bttn, rebuildcurve_densitycount)
+    # CALLBACKS
 
-        centerguidelayout.addLayout(rebuildcurvelayout)
+    # Scalp callbacks
+    def set_scalp_surface_callback(self):
+        scalp = selection.fetch_selection(shape=True)
+        if scalp:
+            self.scalp_surface_button.set_text(scalp)
+        else:
+            self.scalp_surface_button.set_text("No Mesh Selected")
 
-        selectallcurves_bttn = QPushButton('Select All CenterGuides')
-        centerguidelayout.addWidget(selectallcurves_bttn)
-        selectallcurves_bttn.clicked.connect(lambda: STB.select_curves(self.descriptions_dropdown.currentText()))
+    def add_new_cell_callback(self):
+        cells.add_cell(self.get_surface())
 
-        deletecurve_bttn = QPushButton('Delete CenterGuide')
-        centerguidelayout.addWidget(deletecurve_bttn)
-        deletecurve_bttn.clicked.connect(lambda: STB.deleteclump())
+    def voronoi_callback(self):
+        pm.select(self.get_surface())
+        voronoi.main()
 
-        # TUBE widgetes
+    # Center Guides callbacks
+    def add_guide_callback(self):
+        guides(self.get_surface(), int(self.add_guide_bttn.get_entry()))
 
-        tube_header = QLabel('TUBE')
-        tube_header.setFont(bold_font)
-        tubelayout.addWidget(tube_header)
+    def rebuild_guides_callback(self):
+        print "rebuild guides callback"
 
-        generatenewtube_bttn = QPushButton('Generate New Tube')
-        tubelayout.addWidget(generatenewtube_bttn)
-        generatenewtube_bttn.clicked.connect(lambda: STB.attachtube(0.8))
+    def select_all_guides_callback(self):
+        print "selecting all center guides"
 
-        edittube_bttn = QPushButton('Edit Tube')
-        tubelayout.addWidget(edittube_bttn)
-        edittube_bttn.clicked.connect(lambda: STB.edittube())
+    # Tubes callback
+    def add_tube_callback(self):
+        print "add Tube call back"
 
-        # savechangestube_bttn = QPushButton('Save Changes')
-        # tubelayout.addWidget(savechangestube_bttn)
+    # Guides callback
+    def build_guides_callback(self):
+        num_guides = self.build_guides_bttn.get_entry()
+        print num_guides
 
-        selectalltubes_bttn = QPushButton('Select All Tubes')
-        tubelayout.addWidget(selectalltubes_bttn)
-        selectalltubes_bttn.clicked.connect(lambda: STB.select_tubes(self.descriptions_dropdown.currentText()))
 
-        deletetube_bttn = QPushButton('Delete Tube')
-        tubelayout.addWidget(deletetube_bttn)
-        deletetube_bttn.clicked.connect(lambda: STB.deletetube())
 
-        # CURVE GEN widgets
-
-        gencurves_header = QLabel('GENERATE CURVES')
-        gencurves_header.setFont(bold_font)
-        gencurveslayout.addWidget(gencurves_header)
-
-        generateguidecurveslayout = QFormLayout()
-        generateguidecurveslayout.setAlignment(Qt.AlignVCenter)
-        gencurveslayout.addLayout(generateguidecurveslayout)
-
-        generate_onlyexternalguides_check = QCheckBox('Generate Only Outer Guides')
-        gencurveslayout.addWidget(generate_onlyexternalguides_check)
-
-        # generate_onlyexternalguides_check.stateChanged.connect()
-
-        filltube_bttn = QPushButton('Fill Selected Tube With Curves')
-
-        filltube_densitycount = QLineEdit()
-        filltube_densitycount.setMaxLength(3)
-        filltube_densitycount.insert('2')
-        filltube_densitycount.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        filltube_bttn.clicked.connect(lambda: STB.gencurvesfromtube(numberofcurves=int(filltube_densitycount.text()),
-                                                                    onlyoutercurves=generate_onlyexternalguides_check.isChecked()))
-
-        generateguidecurves_bttn = QPushButton('Generate Guide Curves')
-
-        gencurves_densitycount = QLineEdit()
-        gencurves_densitycount.setMaxLength(3)
-        gencurves_densitycount.setClearButtonEnabled(True)
-        gencurves_densitycount.insert('2')
-        gencurves_densitycount.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        generateguidecurves_bttn.clicked.connect(lambda: STB.gencurvesglobal(int(gencurves_densitycount.text()),
-                                                                             onlyoutercurves=generate_onlyexternalguides_check.isChecked()))
-
-        generateguidecurveslayout.addRow(filltube_bttn, filltube_densitycount)
-        generateguidecurveslayout.addRow(generateguidecurves_bttn, gencurves_densitycount)
-
-        deleteguidecurves_bttn = QPushButton("Delete Selected Tube's Guide Curves")
-        gencurveslayout.addWidget(deleteguidecurves_bttn)
-        deleteguidecurves_bttn.clicked.connect(lambda: STB.deleteguidecurves())
-
-        deleteallguidecurves_bttn = QPushButton("Delete All Guide Curves")
-        gencurveslayout.addWidget(deleteallguidecurves_bttn)
-        deleteallguidecurves_bttn.clicked.connect(lambda: STB.remove_allguidecurves())
-
-        extractguides_bttn = QPushButton('Extract Guides')
-        gencurveslayout.addWidget(extractguides_bttn)
-        extractguides_bttn.clicked.connect(lambda: STB.extract_guide_curves())
-
-        #   adding frames
-
-        self.layout().addWidget(scalp_frame)
-        #self.layout().addWidget(centerguide_frame)
-        #self.layout().addWidget(tube_frame)
-        self.layout().addWidget(centerguide_tube_frame)
-        self.layout().addWidget(generatecurves_frame)
-
-    # functions
-
-    def setScalpShape(self):
-        return
-        # scalp = Utilities.selection.fetch_selection(shape=True)
-        # self.voronoi_surface_entry.setText(scalp)
-        # print "Scalp shape has been set to : %s"%scalp
 
 
 def main():

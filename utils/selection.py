@@ -3,7 +3,7 @@ Collection of Maya selection methods
 '''
 import maya.cmds as mc
 import pymel.core as pm
-import maya.api.openMaya as om
+import maya.api.OpenMaya as om
 
 
 def fetch_selection(OpenMaya=False, cmds = False, pymel=False, shape=False):
@@ -18,8 +18,11 @@ def fetch_selection(OpenMaya=False, cmds = False, pymel=False, shape=False):
         return selection
     elif shape:
         selection = mc.ls(selection=1, l=1)[0]
-        selection = mc.listRelatives(selection, shapes=1, ad=1, f=1)[0]
-        return selection
+        if len(selection):
+            selection = mc.listRelatives(selection, shapes=1, ad=1, f=1)[0]
+            return selection
+        else:
+            return
     elif pymel:
         selection = pm.ls(selection=1, l=1)[0]
         return pm.listRelatives(selection, shapes=1, ad=1, f=1)[0]
